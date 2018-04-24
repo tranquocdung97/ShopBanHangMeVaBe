@@ -2,25 +2,27 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;
-using System.Data.Sql;
+using System.Configuration;
 
 namespace WindowsFormsApplication1
 {
     
     public partial class MatHang : Form
     {
-        SqlConnection conect = new SqlConnection("Data Source=DESKTOP-31FIH19\\HOADANG;Initial Catalog=shopMeVaBe;Integrated Security=True");
+        SqlConnection cnn;
         String type, maHangCu, ncc;
         Load load;
         public MatHang(String t, Load l)
         {
             InitializeComponent();
+            string connectionString = ConfigurationManager.ConnectionStrings["Conn"].ConnectionString;
+            cnn = new SqlConnection(connectionString);
             type = t;
             button1.Text = type;
             this.Load += MatHang_Load;
@@ -46,9 +48,9 @@ namespace WindowsFormsApplication1
         void MatHang_Load(object sender, EventArgs e)
         {
 
-            conect.Open();
+            cnn.Open();
             string sql = "select tenNhaCungCap from NhaCungCap";
-            SqlCommand cmd = new SqlCommand(sql, conect);
+            SqlCommand cmd = new SqlCommand(sql, cnn);
             SqlDataAdapter dt = new SqlDataAdapter(cmd);
             DataTable tb = new DataTable();
             dt.Fill(tb);
@@ -71,7 +73,7 @@ namespace WindowsFormsApplication1
                 {
                     string mh = textBox1.Text;
                     string query = "select maHang from MatHang where maHang = '" + mh + "'";
-                    SqlCommand cmd = new SqlCommand(query, conect);
+                    SqlCommand cmd = new SqlCommand(query, cnn);
                     SqlDataReader maH = cmd.ExecuteReader();
                     if (maH.Read() && !mh.Equals(maHangCu))
                     {
@@ -87,14 +89,14 @@ namespace WindowsFormsApplication1
                         int sl = Int32.Parse(textBox5.Text);
                         string item = (string)this.comboBox1.SelectedItem;
                         string getNCC = "select maNhaCungCap from NhaCungCap where tenNhaCungCap ='" + item + "'";
-                        cmd = new SqlCommand(getNCC, conect);
+                        cmd = new SqlCommand(getNCC, cnn);
                         SqlDataReader dtr = cmd.ExecuteReader();
                         if (dtr.Read())
                         {
                             String maNCC = (string)dtr[0];
                             dtr.Close();
                             string update = "update MatHang set maHang='" + mh + "',tenHang= N'" + th + "', giaVon=" + gv + ", giaBan=" + gb + ",soLuong=" + sl + ",maNhaCungCap = N'" + maNCC + "' where maHang='" + maHangCu + "'";
-                            cmd = new SqlCommand(update, conect);
+                            cmd = new SqlCommand(update, cnn);
                             try
                             {
                                 cmd.ExecuteNonQuery();
@@ -105,7 +107,7 @@ namespace WindowsFormsApplication1
                             {
                                 MessageBox.Show("Update dữ liệu không thành công !!!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
-                            conect.Close();
+                            cnn.Close();
                         }
                         else
                         {
@@ -125,7 +127,7 @@ namespace WindowsFormsApplication1
                 {
                     string mh = textBox1.Text;
                     string query = "select maHang from MatHang where maHang = '"+mh+"'";
-                    SqlCommand cmd = new SqlCommand(query, conect);
+                    SqlCommand cmd = new SqlCommand(query, cnn);
                     SqlDataReader maH = cmd.ExecuteReader();
                     if (maH.Read())
                     {
@@ -141,14 +143,14 @@ namespace WindowsFormsApplication1
                         int sl = Int32.Parse(textBox5.Text);
                         string item = (string)this.comboBox1.SelectedItem;
                         string getNCC = "select maNhaCungCap from NhaCungCap where tenNhaCungCap ='" + item + "'";
-                        cmd = new SqlCommand(getNCC, conect);
+                        cmd = new SqlCommand(getNCC, cnn);
                         SqlDataReader dtr = cmd.ExecuteReader();
                         if (dtr.Read())
                         {
                             String maNCC = (string)dtr[0];
                             dtr.Close();
                             string update = "insert into MatHang values ('" + mh + "', N'" + th + "', " + gv + ", " + gb + "," + sl + ",'" + maNCC + "')";
-                            cmd = new SqlCommand(update, conect);
+                            cmd = new SqlCommand(update, cnn);
                             try
                             {
                                 cmd.ExecuteNonQuery();
